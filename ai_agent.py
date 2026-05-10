@@ -17,15 +17,23 @@ OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY")
 
 system_prompt = "Act as an AI chatbot who is smart and friendly"
 
-agent = create_react_agent(
-    model = groq_llm,
-    tools = [search_tool],
-    prompt = system_prompt
-)
+def get_response_from_ai_agent(llm_id,query,allow_search,provider ):
+    if provider == "Groq":
+        llm = ChatGroq(model=llm_id)
+    elif provider == "OpenAI":
+        llm = ChatOpenAI(model=llm_id)
+    
+    tools = [TavilySearchResults(max_results=2)] if allow_search else []
 
-query="What are the latest advancements in AI research?"
-state={"messages":query}
-response = agent.invoke(state)
-messages = response.get("messages")
-ai_messages = [message.content for message in messages if isinstance(message, AIMessage)]
-print(ai_messages[-1])
+    agent = create_react_agent(
+        model = groq_llm,
+        tools = [search_tool],
+        prompt = system_prompt
+    )
+
+    query="What are the latest advancements in AI research?"
+    state={"messages":query}
+    response = agent.invoke(state)
+    messages = response.get("messages")
+    ai_messages = [message.content for message in messages if isinstance(message, AIMessage)]
+    return ai_messages[-1]
