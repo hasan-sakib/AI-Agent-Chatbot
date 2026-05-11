@@ -46,8 +46,8 @@ def chat_endpoint(request: RequestState):
 
     # Create AI Agent and get response from it! 
     try:
-        response=get_response_from_ai_agent(llm_id, query, allow_search, system_prompt, provider)
-        return response
+        response = get_response_from_ai_agent(llm_id, query, allow_search, system_prompt, provider)
+        return {"response": response}
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:

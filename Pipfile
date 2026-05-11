@@ -11,6 +11,7 @@ langgraph = "*"
 pydantic = "*"
 fastapi = "*"
 uvicorn = "*"
+streamlit = "*"
 
 [dev-packages]
 
