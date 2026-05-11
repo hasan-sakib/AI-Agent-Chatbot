@@ -1,26 +1,59 @@
+# if you dont use pipenv uncomment the following:
+# from dotenv import load_dotenv
+# load_dotenv()
+
+#Step1: Setup Pydantic Model (Schema Validation)
 from pydantic import BaseModel
 from typing import List
+
 
 class RequestState(BaseModel):
     model_name: str
     model_provider: str
     system_prompt: str
-    messages: list[str]
+    messages: List[str]
     allow_search: bool
 
 
-
-from fastapi import FastAPI
+#Step2: Setup AI Agent from FrontEnd Request
+from fastapi import FastAPI, HTTPException
 from ai_agent import get_response_from_ai_agent
 
-ALLOWED_MODEL_NAMES = ["llama3-70b-8192","mixtral-87b-32768","gpt-4o-mini", "llama-3.3-70b-versatile"]
+ALLOWED_MODEL_NAMES=["llama3-70b-8192", "mixtral-8x7b-32768", "llama-3.3-70b-versatile", "gpt-4o-mini"]
+ALLOWED_PROVIDERS = {"groq", "openai"}
 
-app=FastAPI(title= "LangGraph AI Agent Chatbot")
+app=FastAPI(title="LangGraph AI Agent")
 
 @app.post("/chat")
-def chat_endpoint(request: RequestState):
+def chat_endpoint(request: RequestState): 
     """
-    API Endpoint to interact with the chatbot using LangGraph and search tools.
+    API Endpoint to interact with the Chatbot using LangGraph and search tools.
+    It dynamically selects the model specified in the request
     """
     if request.model_name not in ALLOWED_MODEL_NAMES:
-        return {"error": f"Invalid model name. Allowed models: {ALLOWED_MODEL_NAMES}"}
+        raise HTTPException(status_code=400, detail="Invalid model_name.")
+    provider = (request.model_provider or "").strip().casefold()
+    if provider not in ALLOWED_PROVIDERS:
+        raise HTTPException(status_code=400, detail="Invalid model_provider. Use 'Groq' or 'OpenAI'.")
+    if not request.messages:
+        raise HTTPException(status_code=400, detail="messages cannot be empty.")
+    
+    llm_id = request.model_name
+    query = request.messages
+    allow_search = request.allow_search
+    system_prompt = request.system_prompt
+    provider = request.model_provider
+
+    # Create AI Agent and get response from it! 
+    try:
+        response=get_response_from_ai_agent(llm_id, query, allow_search, system_prompt, provider)
+        return response
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    except Exception as exc:
+        raise HTTPException(status_code=500, detail=f"Internal server error: {exc}") from exc
+
+#Step3: Run app & Explore Swagger UI Docs
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="127.0.0.1", port=9999)
