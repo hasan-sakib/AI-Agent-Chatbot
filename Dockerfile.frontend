@@ -1,0 +1,17 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1
+
+COPY Pipfile Pipfile.lock /app/
+RUN pip install --no-cache-dir pipenv && \
+    pipenv install --system --deploy
+
+COPY . /app/
+
+EXPOSE 8501
+
+CMD ["streamlit", "run", "frontend.py", "--server.address=0.0.0.0", "--server.port=8501"]
+

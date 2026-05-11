@@ -1,4 +1,5 @@
 import streamlit as st
+import os
 
 st.set_page_config(page_title="LangGraph AI Agent", page_icon=":robot_face:")   
 st.title("LangGraph AI Agent Chatbot")
@@ -21,7 +22,7 @@ allow_search = st.checkbox("Allow search? (Useful for complex questions)")
 
 user_query = st.text_area("Enter your query: ",height=70,placeholder="Ask anything")
 
-API_URL = "http://127.0.0.1:9999/chat"
+API_URL = os.environ.get("API_URL", "http://127.0.0.1:9999/chat").strip()
 
 if st.button("Ask Agent"):
     if user_query.strip():
