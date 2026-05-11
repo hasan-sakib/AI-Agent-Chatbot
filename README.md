@@ -56,89 +56,136 @@ docker run --rm -p 8501:8501 \
   ai-agent-frontend
 ```
 
-## AWS deployment (recommended: AWS App Runner + ECR)
+## Azure deployment (recommended: Azure Container Apps + ACR)
 
 You’ll deploy **two containers**:
 
-- `ai-agent-backend` → App Runner service (public URL like `https://xxxx.awsapprunner.com`)
-- `ai-agent-frontend` → App Runner service (public URL) that calls the backend URL via `API_URL`
+- `ai-agent-backend` → Azure Container App (public URL)
+- `ai-agent-frontend` → Azure Container App (public URL) that calls the backend URL via `API_URL`
 
-### 1) Create two ECR repositories
+### 0) Prereqs
 
-In AWS Console:
+- Install and sign in with Azure CLI:
 
-- ECR → **Create repository** → `ai-agent-backend`
-- ECR → **Create repository** → `ai-agent-frontend`
+```bash
+az login
+```
 
-### 2) Build images locally
+### 1) Create an Azure resource group
+
+Replace `<region>` with a valid Azure region name (example: `eastus`).
+
+```bash
+az group create --name ai-agent-rg --location <region>
+```
+
+### 2) Create an Azure Container Registry (ACR)
+
+Pick a globally-unique registry name (lowercase, no dashes).
+
+```bash
+az acr create --resource-group ai-agent-rg --name <acrName> --sku Basic
+az acr login --name <acrName>
+```
+
+### 3) Build images locally
 
 ```bash
 docker build -f Dockerfile.backend -t ai-agent-backend .
 docker build -f Dockerfile.frontend -t ai-agent-frontend .
 ```
 
-### 3) Authenticate Docker to ECR
+### 4) Tag and push images to ACR
 
 Replace:
-- `<region>` e.g. `us-east-1`
-- `<account_id>` your AWS account number
+- `<acrName>` your ACR name
 
 ```bash
-aws ecr get-login-password --region <region> | \
-  docker login --username AWS --password-stdin <account_id>.dkr.ecr.<region>.amazonaws.com
+docker tag ai-agent-backend:latest <acrName>.azurecr.io/ai-agent-backend:latest
+docker push <acrName>.azurecr.io/ai-agent-backend:latest
+
+docker tag ai-agent-frontend:latest <acrName>.azurecr.io/ai-agent-frontend:latest
+docker push <acrName>.azurecr.io/ai-agent-frontend:latest
 ```
 
-### 4) Tag and push images to ECR
+### 5) Create an Azure Container Apps environment
 
 ```bash
-docker tag ai-agent-backend:latest <account_id>.dkr.ecr.<region>.amazonaws.com/ai-agent-backend:latest
-docker push <account_id>.dkr.ecr.<region>.amazonaws.com/ai-agent-backend:latest
+az extension add --name containerapp --upgrade
+az provider register --namespace Microsoft.App
+az provider register --namespace Microsoft.OperationalInsights
 
-docker tag ai-agent-frontend:latest <account_id>.dkr.ecr.<region>.amazonaws.com/ai-agent-frontend:latest
-docker push <account_id>.dkr.ecr.<region>.amazonaws.com/ai-agent-frontend:latest
+az containerapp env create \
+  --name ai-agent-env \
+  --resource-group ai-agent-rg \
+  --location <region>
 ```
 
-### 5) Create the backend App Runner service
+### 6) Deploy the backend container app
 
-AWS Console:
+This exposes the backend publicly and listens on port `9999`.
 
-1. App Runner → **Create service**
-2. Source → **Container registry**
-3. Provider → **Amazon ECR**
-4. Select repo `ai-agent-backend` and image tag `latest`
-5. Service settings:
-   - **Port**: `9999`
-6. Environment variables (set what you use):
-   - `GROQ_API_KEY` = `...`
-   - `OPENAI_API_KEY` = `...`
-   - `TAVILY_API_KEY` = `...` (optional)
-7. Create service and wait until it is **Running**
+```bash
+az containerapp create \
+  --name ai-agent-backend \
+  --resource-group ai-agent-rg \
+  --environment ai-agent-env \
+  --image <acrName>.azurecr.io/ai-agent-backend:latest \
+  --registry-server <acrName>.azurecr.io \
+  --target-port 9999 \
+  --ingress external \
+  --env-vars \
+    GROQ_API_KEY="$GROQ_API_KEY" \
+    OPENAI_API_KEY="$OPENAI_API_KEY" \
+    TAVILY_API_KEY="$TAVILY_API_KEY"
+```
 
-Copy the backend service URL, e.g.:
+Get the backend URL:
 
-`https://<backend>.awsapprunner.com`
+```bash
+az containerapp show \
+  --name ai-agent-backend \
+  --resource-group ai-agent-rg \
+  --query properties.configuration.ingress.fqdn -o tsv
+```
 
 Your chat endpoint will be:
 
-`https://<backend>.awsapprunner.com/chat`
+`https://<backend-fqdn>/chat`
 
-### 6) Create the frontend App Runner service
+### 7) Deploy the frontend container app
 
-AWS Console:
+Set `API_URL` to your backend endpoint and expose Streamlit on port `8501`.
 
-1. App Runner → **Create service**
-2. Source → **Container registry** → ECR → repo `ai-agent-frontend`
-3. Service settings:
-   - **Port**: `8501`
-4. Environment variables:
-   - `API_URL` = `https://<backend>.awsapprunner.com/chat`
-5. Create service → wait for **Running**
+```bash
+az containerapp create \
+  --name ai-agent-frontend \
+  --resource-group ai-agent-rg \
+  --environment ai-agent-env \
+  --image <acrName>.azurecr.io/ai-agent-frontend:latest \
+  --registry-server <acrName>.azurecr.io \
+  --target-port 8501 \
+  --ingress external \
+  --env-vars \
+    API_URL="https://<backend-fqdn>/chat"
+```
 
-Open the frontend App Runner URL in your browser.
+Get the frontend URL:
+
+```bash
+az containerapp show \
+  --name ai-agent-frontend \
+  --resource-group ai-agent-rg \
+  --query properties.configuration.ingress.fqdn -o tsv
+```
+
+Open:
+
+`https://<frontend-fqdn>`
 
 ## Notes / Tips
 
 - **Don’t commit `.env`**. Commit `.env.example` only.
 - If OpenAI requests fail with `429 insufficient_quota`, that’s an account billing/quota issue; Groq may still work.
-- For production, consider setting App Runner **instance size** higher if responses are slow.
+- For production, consider increasing Container Apps CPU/memory if responses are slow.
 

@@ -19,7 +19,10 @@ class RequestState(BaseModel):
 from fastapi import FastAPI, HTTPException
 from ai_agent import get_response_from_ai_agent
 
-ALLOWED_MODEL_NAMES=["llama3-70b-8192", "mixtral-8x7b-32768", "llama-3.3-70b-versatile", "gpt-4o-mini"]
+ALLOWED_MODELS_BY_PROVIDER = {
+    "groq": {"llama-3.3-70b-versatile", "llama-3.1-8b-instant"},
+    "openai": {"gpt-4o-mini"},
+}
 ALLOWED_PROVIDERS = {"groq", "openai"}
 
 app=FastAPI(title="LangGraph AI Agent")
@@ -30,11 +33,14 @@ def chat_endpoint(request: RequestState):
     API Endpoint to interact with the Chatbot using LangGraph and search tools.
     It dynamically selects the model specified in the request
     """
-    if request.model_name not in ALLOWED_MODEL_NAMES:
-        raise HTTPException(status_code=400, detail="Invalid model_name.")
     provider = (request.model_provider or "").strip().casefold()
     if provider not in ALLOWED_PROVIDERS:
         raise HTTPException(status_code=400, detail="Invalid model_provider. Use 'Groq' or 'OpenAI'.")
+    if request.model_name not in ALLOWED_MODELS_BY_PROVIDER[provider]:
+        raise HTTPException(
+            status_code=400,
+            detail=f"Invalid model_name for provider '{request.model_provider}'.",
+        )
     if not request.messages:
         raise HTTPException(status_code=400, detail="messages cannot be empty.")
     
