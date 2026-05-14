@@ -2,7 +2,7 @@ import os
 import requests
 import streamlit as st
 
-st.set_page_config(page_title="AI Agent Chatbot", page_icon=":robot_face:", layout="wide")
+st.set_page_config(page_title="Personal Chatbot", page_icon=":robot_face:", layout="wide")
 
 API_URL = os.environ.get("API_URL", "http://127.0.0.1:9999/chat").strip()
 MODELNAMES_GROQ = ["llama-3.3-70b-versatile", "llama-3.1-8b-instant"]
@@ -14,6 +14,8 @@ if "chat_history" not in st.session_state:
 st.markdown(
     """
     <style>
+    @import url('https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&display=swap');
+
     /* ── Base layout ── */
     .block-container {
         padding-top: 1.25rem;
@@ -25,38 +27,50 @@ st.markdown(
     .app-header {
         background: linear-gradient(120deg, #312e81 0%, #4f46e5 42%, #7c3aed 100%);
         border-radius: 16px;
-        padding: 20px 24px;
+        padding: 16px 20px;
         color: #ffffff;
         margin-bottom: 12px;
         box-shadow: 0 12px 28px rgba(49, 46, 129, 0.28);
     }
-    .app-header h2 {
-        margin: 0 0 8px 0;
-        font-size: 1.55rem;
+    .header-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
     }
-    .app-header p {
+    .header-title {
+        flex: 1;
+        text-align: center;
+    }
+    .header-title h1 {
+        font-family: 'Cinzel Decorative', cursive;
+        font-size: 1.8rem;
+        font-weight: 700;
         margin: 0;
-        opacity: 0.92;
-        font-size: 0.95rem;
+        background: linear-gradient(90deg, #e0e7ff 0%, #ffffff 40%, #c4b5fd 70%, #ffffff 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 0.04em;
+        text-shadow: none;
+        filter: drop-shadow(0 0 18px rgba(196,181,253,0.55));
     }
 
-    /* ── Generating loader — fixed top-left ── */
+    /* ── Left orb animation (inline in header) ── */
     .loader-wrapper {
-        position: fixed;
-        top: 12px;
-        left: 70px;
+        position: relative;
         display: flex;
         align-items: center;
         justify-content: center;
-        width: 110px;
-        height: 110px;
+        flex-shrink: 0;
+        width: 90px;
+        height: 90px;
         font-family: "Inter", sans-serif;
-        font-size: 0.65em;
+        font-size: 0.6em;
         font-weight: 300;
         color: white;
         border-radius: 50%;
         user-select: none;
-        z-index: 2147483647;
         letter-spacing: 1px;
     }
     .loader {
@@ -116,67 +130,12 @@ st.markdown(
         40%       { opacity: 0.7; transform: translateY(0); }
     }
 
-    /* ── Tablet (≤ 768px) ── */
-    @media (max-width: 768px) {
-        .block-container {
-            padding-top: 0.75rem !important;
-            padding-left: 0.75rem !important;
-            padding-right: 0.75rem !important;
-            max-width: 100% !important;
-        }
-        .app-header {
-            padding: 14px 16px;
-            border-radius: 12px;
-            margin-bottom: 8px;
-        }
-        .app-header h2 {
-            font-size: 1.2rem;
-        }
-        .app-header p {
-            font-size: 0.83rem;
-        }
-        .loader-wrapper {
-            width: 80px;
-            height: 80px;
-            top: 8px;
-            left: 8px;
-            font-size: 0.52em;
-        }
-    }
-
-    /* ── Mobile (≤ 480px) ── */
-    @media (max-width: 480px) {
-        .block-container {
-            padding-left: 0.5rem !important;
-            padding-right: 0.5rem !important;
-        }
-        .app-header {
-            padding: 12px 14px;
-            border-radius: 10px;
-        }
-        .app-header h2 {
-            font-size: 1.05rem;
-            margin-bottom: 4px;
-        }
-        .app-header p {
-            font-size: 0.78rem;
-            opacity: 0.85;
-        }
-        .loader-wrapper {
-            width: 64px;
-            height: 64px;
-            top: 6px;
-            left: 6px;
-            font-size: 0.44em;
-        }
-    }
-
-    /* ── Hamster Wheel Loader — fixed top-right ── */
+    /* ── Right hamster animation (inline in header) ── */
     .hamster-wrapper {
-        position: fixed;
-        top: 12px;
-        right: 12px;
-        z-index: 2147483647;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     .hamster-wrapper .wheel-and-hamster {
         --dur: 1s;
@@ -382,26 +341,31 @@ st.markdown(
         to   { transform: rotate(-1turn); }
     }
 
-    /* ── Tablet (≤ 768px) hamster ── */
+    /* ── Tablet (≤ 768px) ── */
     @media (max-width: 768px) {
-        .hamster-wrapper {
-            top: 8px;
-            right: 8px;
+        .block-container {
+            padding-top: 0.75rem !important;
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+            max-width: 100% !important;
         }
-        .hamster-wrapper .wheel-and-hamster {
-            font-size: 6px;
-        }
+        .app-header { padding: 12px 14px; border-radius: 12px; }
+        .header-title h1 { font-size: 1.3rem; }
+        .loader-wrapper  { width: 70px; height: 70px; font-size: 0.5em; }
+        .hamster-wrapper .wheel-and-hamster { font-size: 6px; }
     }
 
-    /* ── Mobile (≤ 480px) hamster ── */
+    /* ── Mobile (≤ 480px) ── */
     @media (max-width: 480px) {
-        .hamster-wrapper {
-            top: 6px;
-            right: 6px;
+        .block-container {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
         }
-        .hamster-wrapper .wheel-and-hamster {
-            font-size: 5px;
-        }
+        .app-header { padding: 10px 10px; border-radius: 10px; }
+        .header-inner { gap: 6px; }
+        .header-title h1 { font-size: 1rem; letter-spacing: 0.02em; }
+        .loader-wrapper  { width: 54px; height: 54px; font-size: 0.42em; }
+        .hamster-wrapper .wheel-and-hamster { font-size: 5px; }
     }
     </style>
     """,
@@ -410,47 +374,47 @@ st.markdown(
 
 st.markdown(
     """
-    <div class="loader-wrapper">
-        <span class="loader-letter">C</span>
-        <span class="loader-letter">h</span>
-        <span class="loader-letter">a</span>
-        <span class="loader-letter">t</span>
-        <span class="loader-letter"> </span>
-        <span class="loader-letter">B</span>
-        <span class="loader-letter">o</span>
-        <span class="loader-letter">t</span>
-        <div class="loader"></div>
-    </div>
-    <div class="hamster-wrapper">
-        <div aria-label="Orange and tan hamster running in a metal wheel"
-             role="img"
-             class="wheel-and-hamster">
-            <div class="wheel"></div>
-            <div class="hamster">
-                <div class="hamster__body">
-                    <div class="hamster__head">
-                        <div class="hamster__ear"></div>
-                        <div class="hamster__eye"></div>
-                        <div class="hamster__nose"></div>
+    <div class="app-header">
+        <div class="header-inner">
+            <div class="loader-wrapper">
+                <span class="loader-letter">C</span>
+                <span class="loader-letter">h</span>
+                <span class="loader-letter">a</span>
+                <span class="loader-letter">t</span>
+                <span class="loader-letter">&nbsp;</span>
+                <span class="loader-letter">B</span>
+                <span class="loader-letter">o</span>
+                <span class="loader-letter">t</span>
+                <div class="loader"></div>
+            </div>
+            <div class="header-title">
+                <h1>Personal Chatbot</h1>
+            </div>
+            <div class="hamster-wrapper">
+                <div aria-label="Hamster running in a wheel" role="img" class="wheel-and-hamster">
+                    <div class="wheel"></div>
+                    <div class="hamster">
+                        <div class="hamster__body">
+                            <div class="hamster__head">
+                                <div class="hamster__ear"></div>
+                                <div class="hamster__eye"></div>
+                                <div class="hamster__nose"></div>
+                            </div>
+                            <div class="hamster__limb hamster__limb--fr"></div>
+                            <div class="hamster__limb hamster__limb--fl"></div>
+                            <div class="hamster__limb hamster__limb--br"></div>
+                            <div class="hamster__limb hamster__limb--bl"></div>
+                            <div class="hamster__tail"></div>
+                        </div>
                     </div>
-                    <div class="hamster__limb hamster__limb--fr"></div>
-                    <div class="hamster__limb hamster__limb--fl"></div>
-                    <div class="hamster__limb hamster__limb--br"></div>
-                    <div class="hamster__limb hamster__limb--bl"></div>
-                    <div class="hamster__tail"></div>
+                    <div class="spoke"></div>
                 </div>
             </div>
-            <div class="spoke"></div>
         </div>
-    </div>
-    <div class="app-header">
-        <h2>LangGraph AI Agent Chatbot</h2>
-        <p>Ask questions, enable live search when needed, and tune model behavior from the sidebar.</p>
     </div>
     """,
     unsafe_allow_html=True,
 )
-st.caption(f"Connected backend: `{API_URL}`")
 
 with st.sidebar:
     st.subheader("Agent Settings")
