@@ -1,6 +1,6 @@
 # LangGraph AI Agent Chatbot
 
-> **A production-ready, multi-provider AI agent** built with LangGraph, FastAPI, and Streamlit — containerised with Docker and deployable to Azure Container Apps in minutes.
+> **A production-ready, multi-provider AI agent** built with LangGraph, FastAPI, and Streamlit — containerised with Docker and deployable to any container runtime.
 
 ---
 
@@ -17,7 +17,6 @@
   - [Run with Docker Compose (Recommended)](#run-with-docker-compose-recommended)
   - [Run without Docker (Pipenv)](#run-without-docker-pipenv)
 - [API Reference](#-api-reference)
-- [Deployment — Azure Container Apps](#-deployment--azure-container-apps)
 - [Configuration Guide](#-configuration-guide)
 - [Security Notes](#-security-notes)
 - [Troubleshooting](#-troubleshooting)
@@ -37,7 +36,7 @@ The **LangGraph AI Agent Chatbot** is a full-stack conversational AI application
 | **Session-aware backend** | Per-session state managed server-side via the Session Manager |
 | **Streaming-ready UI** | Streamlit chat interface with animated "Generating…" indicator |
 | **Containerised & cloud-ready** | Two Docker images — frontend & backend — orchestrated with Docker Compose |
-| **Zero-lock-in deployment** | Ships to Azure Container Apps, AWS ECS, or any container runtime |
+| **Zero-lock-in deployment** | Ships to Render, Railway, Fly.io, or any container runtime |
 
 ---
 
@@ -81,7 +80,6 @@ The system is composed of four logical layers, all running inside Docker:
 | **Schema Validation** | Pydantic v2 | `2.x` |
 | **Containerisation** | Docker + Docker Compose | `v2` |
 | **Package Manager** | Pipenv | `2024+` |
-| **Cloud Deploy** | Azure Container Apps + ACR | — |
 | **Language** | Python | `3.11` |
 
 ---
@@ -95,7 +93,6 @@ The system is composed of four logical layers, all running inside Docker:
 -  **Custom System Prompts** — Editable system prompt to change the agent's personality/role at runtime
 - **Provider Allow-list** — Backend enforces a whitelist of allowed models/providers
 - **Fully Containerised** — Separate Dockerfiles for frontend and backend, composed together
-- **Azure-Ready** — Step-by-step deployment guide for Azure Container Apps
 
 ---
 
