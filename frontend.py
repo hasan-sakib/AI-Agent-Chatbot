@@ -14,11 +14,14 @@ if "chat_history" not in st.session_state:
 st.markdown(
     """
     <style>
+    /* ── Base layout ── */
     .block-container {
         padding-top: 1.25rem;
         padding-bottom: 1rem;
         max-width: 1100px;
     }
+
+    /* ── Header ── */
     .app-header {
         background: linear-gradient(120deg, #312e81 0%, #4f46e5 42%, #7c3aed 100%);
         border-radius: 16px;
@@ -34,9 +37,10 @@ st.markdown(
     .app-header p {
         margin: 0;
         opacity: 0.92;
+        font-size: 0.95rem;
     }
 
-    /* Generating loader — fixed top-left */
+    /* ── Generating loader — fixed top-left ── */
     .loader-wrapper {
         position: fixed;
         top: 12px;
@@ -110,6 +114,61 @@ st.markdown(
         0%, 100% { opacity: 0.4; transform: translateY(0); }
         20%       { opacity: 1;   transform: scale(1.15);  }
         40%       { opacity: 0.7; transform: translateY(0); }
+    }
+
+    /* ── Tablet (≤ 768px) ── */
+    @media (max-width: 768px) {
+        .block-container {
+            padding-top: 0.75rem !important;
+            padding-left: 0.75rem !important;
+            padding-right: 0.75rem !important;
+            max-width: 100% !important;
+        }
+        .app-header {
+            padding: 14px 16px;
+            border-radius: 12px;
+            margin-bottom: 8px;
+        }
+        .app-header h2 {
+            font-size: 1.2rem;
+        }
+        .app-header p {
+            font-size: 0.83rem;
+        }
+        .loader-wrapper {
+            width: 80px;
+            height: 80px;
+            top: 8px;
+            left: 8px;
+            font-size: 0.52em;
+        }
+    }
+
+    /* ── Mobile (≤ 480px) ── */
+    @media (max-width: 480px) {
+        .block-container {
+            padding-left: 0.5rem !important;
+            padding-right: 0.5rem !important;
+        }
+        .app-header {
+            padding: 12px 14px;
+            border-radius: 10px;
+        }
+        .app-header h2 {
+            font-size: 1.05rem;
+            margin-bottom: 4px;
+        }
+        .app-header p {
+            font-size: 0.78rem;
+            opacity: 0.85;
+        }
+        .loader-wrapper {
+            width: 64px;
+            height: 64px;
+            top: 6px;
+            left: 6px;
+            font-size: 0.44em;
+        }
     }
     </style>
     """,
