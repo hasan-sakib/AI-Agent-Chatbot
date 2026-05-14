@@ -44,13 +44,12 @@ st.markdown(
         font-size: 1.8rem;
         font-weight: 700;
         margin: 0;
-        background: linear-gradient(90deg, #e0e7ff 0%, #ffffff 40%, #c4b5fd 70%, #ffffff 100%);
+        background: linear-gradient(90deg, #3730a3 0%, #7c3aed 45%, #4f46e5 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         letter-spacing: 0.04em;
-        text-shadow: none;
-        filter: drop-shadow(0 0 18px rgba(196,181,253,0.55));
+        filter: drop-shadow(0 0 14px rgba(124, 58, 237, 0.35));
     }
 
     /* ── Left orb animation (inline in header) ── */
