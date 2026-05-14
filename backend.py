@@ -1,11 +1,8 @@
-# if you dont use pipenv uncomment the following:
-# from dotenv import load_dotenv
-# load_dotenv()
+from dotenv import load_dotenv
+load_dotenv()
 
-#Step1: Setup Pydantic Model (Schema Validation)
 from pydantic import BaseModel
 from typing import List
-
 
 class RequestState(BaseModel):
     model_name: str
@@ -14,8 +11,6 @@ class RequestState(BaseModel):
     messages: List[str]
     allow_search: bool
 
-
-#Step2: Setup AI Agent from FrontEnd Request
 from fastapi import FastAPI, HTTPException
 from ai_agent import get_response_from_ai_agent
 
@@ -25,14 +20,11 @@ ALLOWED_MODELS_BY_PROVIDER = {
 }
 ALLOWED_PROVIDERS = {"groq", "openai"}
 
-app=FastAPI(title="LangGraph AI Agent")
+app = FastAPI(title="LangGraph AI Agent")
+
 
 @app.post("/chat")
-def chat_endpoint(request: RequestState): 
-    """
-    API Endpoint to interact with the Chatbot using LangGraph and search tools.
-    It dynamically selects the model specified in the request
-    """
+def chat_endpoint(request: RequestState):
     provider = (request.model_provider or "").strip().casefold()
     if provider not in ALLOWED_PROVIDERS:
         raise HTTPException(status_code=400, detail="Invalid model_provider. Use 'Groq' or 'OpenAI'.")
@@ -43,23 +35,22 @@ def chat_endpoint(request: RequestState):
         )
     if not request.messages:
         raise HTTPException(status_code=400, detail="messages cannot be empty.")
-    
-    llm_id = request.model_name
-    query = request.messages
-    allow_search = request.allow_search
-    system_prompt = request.system_prompt
-    provider = request.model_provider
 
-    # Create AI Agent and get response from it! 
     try:
-        response = get_response_from_ai_agent(llm_id, query, allow_search, system_prompt, provider)
+        response = get_response_from_ai_agent(
+            request.model_name,
+            request.messages,
+            request.allow_search,
+            request.system_prompt,
+            request.model_provider,
+        )
         return {"response": response}
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     except Exception as exc:
         raise HTTPException(status_code=500, detail=f"Internal server error: {exc}") from exc
 
-#Step3: Run app & Explore Swagger UI Docs
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run(app, host="127.0.0.1", port=9999)

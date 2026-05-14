@@ -12,6 +12,7 @@ pydantic = "*"
 fastapi = "*"
 uvicorn = "*"
 streamlit = "*"
+python-dotenv = "*"
 
 [dev-packages]
 

@@ -1,5 +1,4 @@
 import os
-
 import requests
 import streamlit as st
 
@@ -35,10 +34,6 @@ st.markdown(
     .app-header p {
         margin: 0;
         opacity: 0.92;
-    }
-    .small-note {
-        font-size: 0.9rem;
-        color: #6b7280;
     }
 
     /* Generating loader — fixed top-left */
@@ -205,5 +200,3 @@ if user_query:
                     st.error(f"Backend error ({response.status_code}): {err}")
             except requests.RequestException as exc:
                 st.error(f"Request failed: {exc}")
-
-
