@@ -18,19 +18,16 @@ st.markdown(
 
     /* ── Base layout ── */
     .block-container {
-        padding-top: 1.25rem;
+        padding-top: 2.5rem !important;
         padding-bottom: 1rem;
         max-width: 1100px;
     }
 
     /* ── Header ── */
     .app-header {
-        background: linear-gradient(120deg, #312e81 0%, #4f46e5 42%, #7c3aed 100%);
-        border-radius: 16px;
-        padding: 16px 20px;
-        color: #ffffff;
-        margin-bottom: 12px;
-        box-shadow: 0 12px 28px rgba(49, 46, 129, 0.28);
+        background: transparent;
+        padding: 8px 4px;
+        margin-bottom: 4px;
     }
     .header-inner {
         display: flex;
@@ -344,12 +341,12 @@ st.markdown(
     /* ── Tablet (≤ 768px) ── */
     @media (max-width: 768px) {
         .block-container {
-            padding-top: 0.75rem !important;
+            padding-top: 3rem !important;
             padding-left: 0.75rem !important;
             padding-right: 0.75rem !important;
             max-width: 100% !important;
         }
-        .app-header { padding: 12px 14px; border-radius: 12px; }
+        .app-header { padding: 6px 4px; }
         .header-title h1 { font-size: 1.3rem; }
         .loader-wrapper  { width: 70px; height: 70px; font-size: 0.5em; }
         .hamster-wrapper .wheel-and-hamster { font-size: 6px; }
@@ -358,10 +355,11 @@ st.markdown(
     /* ── Mobile (≤ 480px) ── */
     @media (max-width: 480px) {
         .block-container {
+            padding-top: 3.5rem !important;
             padding-left: 0.5rem !important;
             padding-right: 0.5rem !important;
         }
-        .app-header { padding: 10px 10px; border-radius: 10px; }
+        .app-header { padding: 4px 2px; }
         .header-inner { gap: 6px; }
         .header-title h1 { font-size: 1rem; letter-spacing: 0.02em; }
         .loader-wrapper  { width: 54px; height: 54px; font-size: 0.42em; }
